@@ -1,0 +1,8 @@
+--------Function displayHubAirport --------
+Main hub airport: New Delhi
+Number of cargo flights visited: 3
+List of Cargo Flights:
+Indigo666
+Indigo777
+AirIndia111
+-----------------------------------------
