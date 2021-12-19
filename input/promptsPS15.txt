@@ -1,0 +1,7 @@
+searchHubAirport
+searchFlight: Indigo666
+searchFlight: AirIndia111
+searchAirports: Calcutta: New Delhi
+searchAirports: Chennai: Hyderabad
+ServiceAvailability: Calcutta: Mumbai
+ServiceAvailability: Nagpur: Vishakhapatnam
