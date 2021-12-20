@@ -20,4 +20,26 @@ Hyderabad-----------------------------------------------------------Function dis
 Airport A : Calcutta
 Airport B : MumbaiCan the food box be sent: Yes, ['Calcutta>>Indigo777>>New Delhi', 'New Delhi>>AirIndia111>>Ahmedabad', 'Ahmedabad>>Spicejet222>>Nagpur']----------------------------------------------------------Function findServiceAvailable--------
 Airport A : Nagpur
+Airport B : VishakhapatnamCan the food box be sent: No, there are no flight services available---------------------------------------------------------Function showAll --------Total number of cargo flights: 5
+Total number of Airports: 8
+
+List of cargo flights: 
+Indigo666
+Indigo777
+Spicejet222
+AirIndia111
+Vistara555
+
+List of Airports: 
+Chennai
+New Delhi
+Calcutta
+Ahmedabad
+Nagpur
+Mumbai
+Vishakhapatnam
+Hyderabad-----------------------------------------------------------Function displayHubAirport----------------Function displayConnectedAirports--------Cargo flight number: Indigo666Number of airports connected: 2List of airports connected directly by : Indigo666ChennaiNew Delhi----------------------------------------------------------Function displayConnectedAirports--------Cargo flight number: AirIndia111Number of airports connected: 2List of airports connected directly by : AirIndia111New DelhiAhmedabad-----------------------------------------------------------Function displayDirectFlight--------Food box can be sent directly: Yes, Indigo777-----------------------------------------------------------Function displayDirectFlight--------Food box can be sent directly: No, as there is no direct flight from Chennai to Hyderabad----------------------------------------------------------Function findServiceAvailable--------
+Airport A : Calcutta
+Airport B : MumbaiCan the food box be sent: Yes, ['Calcutta>>Indigo777>>New Delhi', 'New Delhi>>AirIndia111>>Ahmedabad', 'Ahmedabad>>Spicejet222>>Nagpur']----------------------------------------------------------Function findServiceAvailable--------
+Airport A : Nagpur
 Airport B : VishakhapatnamCan the food box be sent: No, there are no flight services available--------------------------------------------------
