@@ -21,9 +21,9 @@ class foodDelivery(object):
 		'''
 		self.outputfile = outputfile
     	# Read input file with airports and flights details
-		self.adj_matrix, self.airports_list, self.flights_list = self.readAirportFlightfile(inputfile)
+		self.adj_matrix, self.airports_dict, self.flights_dict = self.readAirportFlightfile(inputfile)
 		self.showAll()
-		# self.print_matrix(self.adj_matrix)
+    	# self.print_matrix(self.adj_matrix)
     	# Read prompt file and execute instructions/functions
 		self.readPromptFile(promptfile)
 
@@ -56,17 +56,6 @@ class foodDelivery(object):
 		except Exception as e:
 			print(e)
 
-	# Helper function: 3
-	def get_list_item_id(self, list_name, item_name):
-		'''
-			Return the index of the item in the given list
-		'''
-		try:
-			return list_name.index(item_name)
-		except ValueError as e:
-			print(e)
-
-
 
     # Operation 1:
 	def readAirportFlightfile(self, inputfile):
@@ -85,12 +74,9 @@ class foodDelivery(object):
 				data = f.readlines()
         		# print("Read Data --> ", data)
 
-			# Contain the set of airports (index will be used as the id in adj_matrix)
-			airports_list= []
-			# Contain the set of flights (index will be used as the id in adj_matrix)
-			flights_list= []
-			# Contains list of airports connected with flight denoted by index
-			graph_data = []
+			airports_dict= {}
+			flights_dict= {}
+			graph_data = {}
 			n_counter, e_counter = 0, 0
 			for i in data:
 				i = i.split("/")
@@ -100,36 +86,33 @@ class foodDelivery(object):
 				if len(i) != 0:
 					edge = i[0]
 					nodes = i[1:]
-					
-					if edge not in flights_list:
-						flights_list.append(edge)
-						# e_counter = e_counter + 1
-					for n in nodes:
-						if n not in airports_list:
-							airports_list.append(n)
-
-					flight_id = self.get_list_item_id(flights_list,edge)
-					if flight_id < len(graph_data): # If the flight id already exists in graph_data then append
+					if edge not in graph_data:
+						graph_data[edge] = []
 						for n in nodes:
-							graph_data[flight_id].append(n)
-					else: # If the flight id doesn't exist in graph_data then assign the nodes list to it
-						graph_data.append(nodes)
-
-					print(graph_data)
-
+							if n not in graph_data[edge]:
+								graph_data[edge].append(n)
+					if edge not in list(flights_dict.keys()):
+						flights_dict[edge] = e_counter
+						e_counter = e_counter + 1
+					for n in nodes:
+						if n not in list(airports_dict.keys()):
+							airports_dict[n] = n_counter
+							n_counter = n_counter + 1
 		
 		    # Fill adjacency matrix
 		    # matrix rows = flights
 		    # matrix cols = airports    
-			r,c = len(flights_list), len(airports_list)
+			r,c = len(flights_dict), len(airports_dict)
 			adj_matrix = [[0]*c for _ in range(r)]
+		
+		
+			for flight in graph_data:
+				row_id = flights_dict[flight]
+				for airport in graph_data[flight]:
+					col_id = airports_dict[airport]
+					adj_matrix[row_id][col_id] = 1
 
-			for flight_id in range(len(graph_data)):
-				for airport in graph_data[flight_id]:
-					airport_id = self.get_list_item_id(airports_list,airport)
-					adj_matrix[flight_id][airport_id] = 1
-
-			return adj_matrix, airports_list, flights_list        	
+			return adj_matrix, airports_dict, flights_dict        	
 		except Exception as e:
 			print(e)
 
@@ -143,8 +126,8 @@ class foodDelivery(object):
 			output of this function should be pushed into outputPS15.txt file. 
 		'''
 		try:
-			cargo_flights = self.flights_list
-			airports = self.airports_list
+			cargo_flights = list(self.flights_dict.keys())
+			airports = list(self.airports_dict.keys())
 		    
 			output_msg = "--------Function showAll --------\n"
 		    
@@ -178,16 +161,16 @@ class foodDelivery(object):
 			max_tot_flights = 0
 			hub_airport = ""
 			hub_flights_lst = []
-			airports = self.airports_list
-			flights = self.flights_list
+			airports = list(self.airports_dict.keys())
+			flights = list(self.flights_dict.keys())
 			for airport in airports:
-				airport_id = self.get_list_item_id(airports,airport)
-		        
+		        # print(self.airports_dict[airport])
+				airport_id = self.airports_dict[airport]
+		        # print(airport_id)
 				total_flights = 0
 				flights_lst = []
 				for flight in flights:
-					flight_id = self.get_list_item_id(flights,flight)
-					
+					flight_id = self.flights_dict[flight]
 					total_flights += self.adj_matrix[flight_id][airport_id]
 					if self.adj_matrix[flight_id][airport_id]:
 						flights_lst.append(flight)
@@ -223,10 +206,10 @@ class foodDelivery(object):
 		'''
 		try:
 			connected_airports = []
-			airports = self.airports_list
-			flight_id = self.get_list_item_id(self.flights_list,flight)
+			airports = list(self.airports_dict.keys())
+			flight_id = self.flights_dict[flight]
 			for airport in airports:
-				airport_id = self.get_list_item_id(airports,airport)
+				airport_id = self.airports_dict[airport]
 				if self.adj_matrix[flight_id][airport_id]:
 					connected_airports.append(airport)
 		
@@ -246,17 +229,17 @@ class foodDelivery(object):
 		except Exception as e:
 			print(e)
 
-    # Helper function: 4
+    # Helper function: 3
 	def displayConnectedFlights(self, airport):
 		'''
     		This function displays all the flights that are connected to a single airport.	
 		'''
 		try:
 			connected_flights = []
-			flights = self.flights_list
-			airport_id = self.get_list_item_id(self.airports_list,airport)
+			flights = list(self.flights_dict.keys())
+			airport_id = self.airports_dict[airport]
 			for flight in flights:
-				flight_id = self.get_list_item_id(flights,flight)
+				flight_id = self.flights_dict[flight]
 				if self.adj_matrix[flight_id][airport_id]:
 					connected_flights.append(flight)
 
@@ -285,11 +268,10 @@ class foodDelivery(object):
 			output_msg = "\n--------Function displayDirectFlight --------\n"
 			output_msg += "Airport A: {}\n".format(airport_a)
 			output_msg += "Airport B: {}\n".format(airport_b)
-			flights = self.flights_list
-			airport_a_id = self.get_list_item_id(self.airports_list,airport_a)
-			airport_b_id = self.get_list_item_id(self.airports_list,airport_b)
+			flights = list(self.flights_dict.keys())
+			airport_a_id, airport_b_id = self.airports_dict[airport_a], self.airports_dict[airport_b]
 			for flight in flights:
-				flight_id = self.get_list_item_id(flights,flight)
+				flight_id = self.flights_dict[flight]
 				if self.adj_matrix[flight_id][airport_a_id] & self.adj_matrix[flight_id][airport_b_id]:
 					output_msg += "Food box can be sent directly: Yes, {}\n".format(flight)
 					output_msg += "-----------------------------------------\n"
@@ -334,7 +316,7 @@ class foodDelivery(object):
 		    #     return -1
 
 		    # Case1: Already visited source airport
-			if self.visited_airports[self.get_list_item_id(self.airports_list,airport_a)]:
+			if self.visited_airports[self.airports_dict[airport_a]]:
 				return None
 
 		    # Case2: Destination airport found/ Direct flight exists to destination
@@ -346,7 +328,7 @@ class foodDelivery(object):
 		    # Case3: Destination airport not found / No direct flight exists to destination (Recursive calls)
 			else:
 		        # mark source airport as visited
-				self.visited_airports[self.get_list_item_id(self.airports_list,airport_a)] = True
+				self.visited_airports[self.airports_dict[airport_a]] = True
 		        # List of connected flights to source airport
 				connected_flights = self.displayConnectedFlights(airport_a)
 				for connected_flight in connected_flights:
@@ -369,7 +351,7 @@ class foodDelivery(object):
     # Wrapper function for findServiceAvailableRecursive()        
 	def findServiceAvailable(self, airport_a, airport_b):
 		try:
-			self.visited_airports = [False]*len(self.airports_list)
+			self.visited_airports = [False]*len(self.airports_dict)
 			self.path = []
 			output_msg = "\n--------Function findServiceAvailable --------\n"
 			output_msg += "Airport A: {}\n".format(airport_a)
