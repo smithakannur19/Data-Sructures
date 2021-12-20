@@ -91,39 +91,52 @@ class foodDelivery(object):
 			flights_list= []
 			# Contains list of airports connected with flight denoted by index
 			graph_data = []
-			n_counter, e_counter = 0, 0
-			for i in data:
-				i = i.split("/")
-				i = list(map(str.strip, i))
-				if "" in i:
-					i.remove("")
-				if len(i) != 0:
-					edge = i[0]
-					nodes = i[1:]
+
+			# Handle data read, line by line
+			for line in data:
+				# Split the line with "/"
+				line = line.split("/")
+				line = list(map(str.strip, line))
+				if "" in line:
+					line.remove("")
+				# if the line is not empty then process the line
+				if len(line) != 0:
+					# After splitting first item would be the flight name
+					flight = line[0]
+					# After rest of the list would be airport names
+					connected_airports = line[1:]
 					
-					if edge not in flights_list:
-						flights_list.append(edge)
-						# e_counter = e_counter + 1
-					for n in nodes:
+					# Populate flights list while cheking for duplicates
+					if flight not in flights_list:
+						flights_list.append(flight)
+
+					# Populate airports list while cheking for duplicates
+					for n in connected_airports:
 						if n not in airports_list:
 							airports_list.append(n)
 
-					flight_id = self.get_list_item_id(flights_list,edge)
-					if flight_id < len(graph_data): # If the flight id already exists in graph_data then append
-						for n in nodes:
+					# Get the flight id from the flight list using helper function
+					flight_id = self.get_list_item_id(flights_list,flight)
+					
+					# populate the temporary nested list(graph_data) to store the graph data
+					if flight_id < len(graph_data): # If the flight id already exists in graph_data
+						for n in connected_airports: # then append airports to it one by one
 							graph_data[flight_id].append(n)
-					else: # If the flight id doesn't exist in graph_data then assign the nodes list to it
-						graph_data.append(nodes)
+					else: # If the flight id doesn't exist in graph_data then assign the airports list to it
+						graph_data.append(connected_airports)
 
-					print(graph_data)
+					# print(graph_data)
 
 		
-		    # Fill adjacency matrix
-		    # matrix rows = flights
-		    # matrix cols = airports    
+
+			# Get the total count of flights and airports
 			r,c = len(flights_list), len(airports_list)
+			# Define and initialize the adjacency matrix
+		    # matrix rows denotes flights
+		    # matrix cols denotes airports			
 			adj_matrix = [[0]*c for _ in range(r)]
 
+		    # Fill adjacency matrix
 			for flight_id in range(len(graph_data)):
 				for airport in graph_data[flight_id]:
 					airport_id = self.get_list_item_id(airports_list,airport)
