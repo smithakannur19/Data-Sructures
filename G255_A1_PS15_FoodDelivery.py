@@ -117,11 +117,12 @@ class foodDelivery(object):
 
 					# Get the flight id from the flight list using helper function
 					flight_id = self.get_list_item_id(flights_list,flight)
-					
+
 					# populate the temporary nested list(graph_data) to store the graph data
 					if flight_id < len(graph_data): # If the flight id already exists in graph_data
 						for n in connected_airports: # then append airports to it one by one
-							graph_data[flight_id].append(n)
+							if n not in graph_data[flight_id]:
+								graph_data[flight_id].append(n)
 					else: # If the flight id doesn't exist in graph_data then assign the airports list to it
 						graph_data.append(connected_airports)
 
@@ -188,25 +189,27 @@ class foodDelivery(object):
 			The function is triggered when the ‘searchHubAirport’ tag is found in the file promptsPS15.txt file.
     	'''
 		try:
+			# Initialize the required variables
 			max_tot_flights = 0
 			hub_airport = ""
 			hub_flights_lst = []
-			airports = self.airports_list
-			flights = self.flights_list
-			for airport in airports:
-				airport_id = self.get_list_item_id(airports,airport)
-		        
+
+			# Iterate through all airports
+			for airport_id in range(len(self.airports_list)):
+				# Initialize total flights and flight list for each airport
 				total_flights = 0
 				flights_lst = []
-				for flight in flights:
-					flight_id = self.get_list_item_id(flights,flight)
-					
+				# Iterate through all flights 
+				for flight_id in range(len(self.flights_list)):
+					# Get the count of connected flights by adding the values in the related matrix column
 					total_flights += self.adj_matrix[flight_id][airport_id]
+					# Append the connected flights to the temporary flights list
 					if self.adj_matrix[flight_id][airport_id]:
-						flights_lst.append(flight)
+						flights_lst.append(self.flights_list[flight_id])
+				# Check whether current max exceeds the previous max and update the values accordingly
 				if max_tot_flights < total_flights:
 					max_tot_flights = total_flights
-					hub_airport = airport
+					hub_airport = self.airports_list[airport_id]
 					hub_flights_lst = flights_lst
 		
 		    
@@ -235,13 +238,15 @@ class foodDelivery(object):
 			If a flight is not found, an appropriate message should be output to file.
 		'''
 		try:
+			# List to keep connected airports
 			connected_airports = []
-			airports = self.airports_list
+			# get id of the flight
 			flight_id = self.get_list_item_id(self.flights_list,flight)
-			for airport in airports:
-				airport_id = self.get_list_item_id(airports,airport)
+
+			# Check for connection for each airport
+			for airport_id in range(len(self.airports_list)):
 				if self.adj_matrix[flight_id][airport_id]:
-					connected_airports.append(airport)
+					connected_airports.append(self.airports_list[airport_id])
 		
 		    
 		
@@ -252,6 +257,8 @@ class foodDelivery(object):
 			for ap in connected_airports:
 				output_msg += "\n {}".format(ap)
 			output_msg += "\n-----------------------------------------\n"
+			# Below is to check whether this method is called directly or called by another method.
+			# Only print and write to output file if called directly.
 			if internal==False:
 				print(output_msg)
 				self.write_to_file(output_msg)
@@ -265,15 +272,15 @@ class foodDelivery(object):
     		This function displays all the flights that are connected to a single airport.	
 		'''
 		try:
+			# List to keep connected flights
 			connected_flights = []
-			flights = self.flights_list
+			# Get the id of the airport
 			airport_id = self.get_list_item_id(self.airports_list,airport)
-			for flight in flights:
-				flight_id = self.get_list_item_id(flights,flight)
-				if self.adj_matrix[flight_id][airport_id]:
-					connected_flights.append(flight)
 
-		    
+			# Check for connection for each flight
+			for flight_id in range(len(self.flights_list)):
+				if self.adj_matrix[flight_id][airport_id]:
+					connected_flights.append(self.flights_list[flight_id])
 
 			output_msg = "\n--------Function displayConnectedFlights --------"
 			output_msg += "\nAirport : {}".format(airport)
@@ -298,20 +305,27 @@ class foodDelivery(object):
 			output_msg = "\n--------Function displayDirectFlight --------\n"
 			output_msg += "Airport A: {}\n".format(airport_a)
 			output_msg += "Airport B: {}\n".format(airport_b)
-			flights = self.flights_list
+			
+			# Get indices of two airports
 			airport_a_id = self.get_list_item_id(self.airports_list,airport_a)
 			airport_b_id = self.get_list_item_id(self.airports_list,airport_b)
-			for flight in flights:
-				flight_id = self.get_list_item_id(flights,flight)
+			
+			# Check for connection for each flight
+			for flight_id in range(len(self.flights_list)):
+				# Both airports should be connected to the same flight for them to be connected
 				if self.adj_matrix[flight_id][airport_a_id] & self.adj_matrix[flight_id][airport_b_id]:
-					output_msg += "Food box can be sent directly: Yes, {}\n".format(flight)
+					output_msg += "Food box can be sent directly: Yes, {}\n".format(self.flights_list[flight_id])
 					output_msg += "-----------------------------------------\n"
 					if internal==False:
 						print(output_msg)
 						self.write_to_file(output_msg)
-					return flight
+					return self.flights_list[flight_id]
+
+			# 
 			output_msg += "Food box can be sent directly: No, There are no direct flights available.\n"
 			output_msg += "-----------------------------------------\n"
+			# Below is to check whether this method is called directly or called by another method.
+			# Only print and write to output file if called directly.
 			if internal==False:
 				print(output_msg)
 				self.write_to_file(output_msg)
@@ -337,9 +351,6 @@ class foodDelivery(object):
 
     	'''
 		try:
-			# self.visited_airports = [False]*len(self.airports_dict)
-			# self.path = []
-
 		    # Notice that case0 won't occur since if there is no path from a -> b then b won't be marked as visited
 		    # # case0: No service available (all airports visited)
 		    # if all(self.visited_airports):
@@ -382,11 +393,16 @@ class foodDelivery(object):
     # Wrapper function for findServiceAvailableRecursive()        
 	def findServiceAvailable(self, airport_a, airport_b):
 		try:
+			# List variable to keep track of visited airports
 			self.visited_airports = [False]*len(self.airports_list)
+			# List variable to keep track of the path while traversing the graph
 			self.path = []
+
 			output_msg = "\n--------Function findServiceAvailable --------\n"
 			output_msg += "Airport A: {}\n".format(airport_a)
 			output_msg += "Airport B: {}\n".format(airport_b)
+
+			# First call of the recursive function
 			self.findServiceAvailableRecursive(airport_a,airport_b)
 			if len(self.path)!=0:
 		        # self.path.insert(0,airport_a)
